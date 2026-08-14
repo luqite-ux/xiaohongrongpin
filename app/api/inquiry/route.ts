@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { mkdir, appendFile } from "node:fs/promises";
 import path from "node:path";
+import { createClient } from "@supabase/supabase-js";
 
 const required = ["name", "company", "email", "message"];
 const fields = ["name", "company", "email", "phone", "country", "product", "quantity", "message"];
@@ -14,14 +15,49 @@ export async function POST(request: Request) {
   }
 
   const payload = Object.fromEntries(fields.map((key) => [key, String(form.get(key) || "").trim()]));
-  const dir = path.join(process.cwd(), ".data");
-  await mkdir(dir, { recursive: true });
-  await appendFile(path.join(dir, "inquiries.jsonl"), `${JSON.stringify({ ...payload, createdAt: new Date().toISOString() })}\n`, "utf8");
+  const saved = await saveInquiry(payload);
+  if (!saved.ok) {
+    return htmlResponse("Inquiry could not be saved", saved.message, 500);
+  }
 
   return htmlResponse(
     "Inquiry received",
     "Thank you. Your project details were received by the website endpoint. The team can now review your solar aluminum frame request."
   );
+}
+
+async function saveInquiry(payload: Record<string, string>): Promise<{ ok: true } | { ok: false; message: string }> {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  const tenantId = process.env.NEXT_PUBLIC_TENANT_ID;
+
+  if (supabaseUrl && anonKey && tenantId) {
+    const supabase = createClient(supabaseUrl, anonKey, { auth: { persistSession: false } });
+    const details = [
+      payload.message,
+      payload.country ? `Country: ${payload.country}` : "",
+      payload.product ? `Product interest: ${payload.product}` : "",
+      payload.quantity ? `Quantity / annual demand: ${payload.quantity}` : ""
+    ].filter(Boolean).join("\n\n");
+
+    const { error } = await supabase.from("inquiries").insert({
+      tenant_id: tenantId,
+      name: payload.name,
+      email: payload.email,
+      phone: payload.phone,
+      company: payload.company,
+      subject: payload.product || "Website inquiry",
+      message: details,
+      status: "unread"
+    });
+    if (error) return { ok: false, message: error.message };
+    return { ok: true };
+  }
+
+  const dir = path.join(process.cwd(), ".data");
+  await mkdir(dir, { recursive: true });
+  await appendFile(path.join(dir, "inquiries.jsonl"), `${JSON.stringify({ ...payload, createdAt: new Date().toISOString() })}\n`, "utf8");
+  return { ok: true };
 }
 
 function htmlResponse(title: string, message: string, status = 200) {
