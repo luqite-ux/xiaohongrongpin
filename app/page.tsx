@@ -6,6 +6,8 @@ import { capabilityStats, text } from "@/lib/site-data";
 import { listPublishedArticles, formatArticleDate } from "@/lib/articles-db";
 import { listProducts } from "@/lib/products-db";
 
+export const revalidate = 60;
+
 export default async function HomePage() {
   const [products, articles] = await Promise.all([listProducts(), listPublishedArticles(3)]);
 

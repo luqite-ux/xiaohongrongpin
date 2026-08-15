@@ -3,6 +3,8 @@ import { notFound } from "next/navigation";
 import { CalendarDays } from "lucide-react";
 import { formatArticleDate, getArticleBySlug, listPublishedArticles } from "@/lib/articles-db";
 
+export const revalidate = 60;
+
 export async function generateStaticParams() {
   const articles = await listPublishedArticles(100);
   return articles.map((article) => ({ slug: article.slug }));

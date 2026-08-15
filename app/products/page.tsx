@@ -9,6 +9,8 @@ export const metadata: Metadata = {
   description: "Solar aluminum frames, black aluminum frames, and custom aluminum profile products for photovoltaic module manufacturers."
 };
 
+export const revalidate = 60;
+
 export default async function ProductsPage() {
   const products = await listProducts();
 

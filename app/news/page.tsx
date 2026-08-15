@@ -8,6 +8,8 @@ export const metadata: Metadata = {
   description: "Company updates and project notes from XiaoHongRongPin."
 };
 
+export const revalidate = 60;
+
 export default async function NewsPage() {
   const articles = await listPublishedArticles();
 

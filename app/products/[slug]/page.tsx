@@ -6,6 +6,8 @@ import { InquiryForm } from "@/components/inquiry-form";
 import { products, text } from "@/lib/site-data";
 import { getProductBySlug, listProducts } from "@/lib/products-db";
 
+export const revalidate = 60;
+
 export function generateStaticParams() {
   return products.map((product) => ({ slug: product.slug }));
 }
