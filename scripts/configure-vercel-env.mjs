@@ -49,7 +49,7 @@ const values = {
   NEXT_PUBLIC_SUPABASE_ANON_KEY: base.NEXT_PUBLIC_SUPABASE_ANON_KEY,
   NEXT_PUBLIC_TENANT_ID: TENANT_ID,
   NEXT_PUBLIC_ADMIN_URL: "https://admin.globle-trade.com",
-  NEXT_PUBLIC_SITE_URL: "https://xiaohongrongpin.vercel.app",
+  NEXT_PUBLIC_SITE_URL: "https://xhrpaluminum.com",
   SUPABASE_SERVICE_ROLE_KEY: base.SUPABASE_SERVICE_ROLE_KEY
 };
 

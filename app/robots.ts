@@ -4,8 +4,9 @@ export default function robots(): MetadataRoute.Robots {
   return {
     rules: {
       userAgent: "*",
-      allow: "/"
+      allow: "/",
+      disallow: ["/admin", "/api"]
     },
-    sitemap: "/sitemap.xml"
+    sitemap: "https://xhrpaluminum.com/sitemap.xml"
   };
 }

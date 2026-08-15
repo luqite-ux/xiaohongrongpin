@@ -10,7 +10,7 @@ const bcrypt = requireFromAdmin("bcryptjs");
 
 const ADMIN_ROOT = "D:/Cursor/Grand/huanqiu-admin";
 const SITE_ROOT = "D:/Cursor/Grand/xiaohongrongpin";
-const DOMAIN = "xiaohongrongpin.vercel.app";
+const DOMAIN = "xhrpaluminum.com";
 const ADMIN_EMAIL = `info@${DOMAIN}`;
 const PASSWORD = "info12345";
 const blockedZh = ["质" + "保", "保" + "修", "质量" + "保证"];
@@ -135,7 +135,7 @@ const tenantPayload = (logoUrl) => ({
     source: "customer XLSX, company profile DOCX, and Codex delivery",
     initialized_at: new Date().toISOString(),
     manually_maintained_fields: [],
-    temporary_domain: DOMAIN,
+    formal_domain: DOMAIN,
     production_url: `https://${DOMAIN}`
   },
   notes: "English launch with future multilingual expansion reserved through i18n JSONB fields."

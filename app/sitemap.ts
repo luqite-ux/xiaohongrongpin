@@ -4,7 +4,7 @@ import { products } from "@/lib/site-data";
 const routes = ["", "/products", "/capabilities", "/custom-solutions", "/quality-control", "/about", "/faq", "/contact"];
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://xiaohongrongpin.example.com";
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://xhrpaluminum.com";
   return [
     ...routes.map((route) => ({
       url: `${baseUrl}${route}`,
