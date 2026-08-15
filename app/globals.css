@@ -538,7 +538,7 @@ textarea {
 
   nav {
     justify-content: flex-start;
-    overflow-x: auto;
+    flex-wrap: wrap;
     padding-bottom: 4px;
   }
 
@@ -566,6 +566,21 @@ textarea {
   .hero {
     min-height: auto;
     padding-top: 56px;
+  }
+
+  .site-header {
+    gap: 16px;
+  }
+
+  nav {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    width: 100%;
+    gap: 10px 14px;
+  }
+
+  nav a {
+    min-height: 32px;
   }
 
   .hero-panel {
