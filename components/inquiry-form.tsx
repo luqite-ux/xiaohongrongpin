@@ -1,9 +1,36 @@
-import { Send, Upload } from "lucide-react";
-import { products, text } from "@/lib/site-data";
+"use client";
 
-export function InquiryForm({ compact = false }: { compact?: boolean }) {
+import { useState, type FormEvent } from "react";
+import { Send, Upload } from "lucide-react";
+import { products as fallbackProducts, text, type Product } from "@/lib/site-data";
+
+export function InquiryForm({ compact = false, products = fallbackProducts, defaultProduct }: { compact?: boolean; products?: Product[]; defaultProduct?: string }) {
+  const [status, setStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
+  const [message, setMessage] = useState("");
+
+  async function submit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const form = event.currentTarget;
+    setStatus("submitting");
+    setMessage("");
+    const response = await fetch("/api/inquiry", {
+      method: "POST",
+      headers: { Accept: "application/json" },
+      body: new FormData(form)
+    });
+    const result = await response.json().catch(() => ({ message: "The inquiry endpoint returned an unexpected response." }));
+    if (!response.ok) {
+      setStatus("error");
+      setMessage(result.message || "Please check the required fields and try again.");
+      return;
+    }
+    form.reset();
+    setStatus("success");
+    setMessage(result.message || "Inquiry received. The team will review your project details.");
+  }
+
   return (
-    <form id="inquiry-form" className={compact ? "inquiry-form compact" : "inquiry-form"} action="/api/inquiry" method="post">
+    <form id="inquiry-form" className={compact ? "inquiry-form compact" : "inquiry-form"} onSubmit={submit}>
       <div className="form-grid">
         <label>
           Name
@@ -27,7 +54,7 @@ export function InquiryForm({ compact = false }: { compact?: boolean }) {
         </label>
         <label>
           Product Interest
-          <select name="product">
+          <select name="product" defaultValue={defaultProduct}>
             {products.map((product) => (
               <option key={product.slug}>{text(product.name)}</option>
             ))}
@@ -45,10 +72,11 @@ export function InquiryForm({ compact = false }: { compact?: boolean }) {
       </label>
       <div className="upload-note">
         <Upload size={18} />
-        Drawing upload will be connected during backend integration. For now, mention drawing details in the message.
+        If drawings are required, mention dimensions and file details in the message so the team can follow up.
       </div>
-      <button type="submit" className="primary-button">
-        Send Inquiry <Send size={18} />
+      {message ? <p className={status === "error" ? "form-message error" : "form-message"}>{message}</p> : null}
+      <button type="submit" className="primary-button" disabled={status === "submitting"}>
+        {status === "submitting" ? "Sending..." : "Send Inquiry"} <Send size={18} />
       </button>
     </form>
   );

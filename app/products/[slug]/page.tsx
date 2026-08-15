@@ -3,7 +3,8 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 import { InquiryForm } from "@/components/inquiry-form";
-import { getProduct, products, text } from "@/lib/site-data";
+import { products, text } from "@/lib/site-data";
+import { getProductBySlug, listProducts } from "@/lib/products-db";
 
 export function generateStaticParams() {
   return products.map((product) => ({ slug: product.slug }));
@@ -11,7 +12,7 @@ export function generateStaticParams() {
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
-  const product = getProduct(slug);
+  const product = await getProductBySlug(slug);
   if (!product) return {};
   return {
     title: text(product.name),
@@ -21,8 +22,9 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
 export default async function ProductDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const product = getProduct(slug);
+  const product = await getProductBySlug(slug);
   if (!product) notFound();
+  const products = await listProducts();
 
   return (
     <main>
@@ -54,7 +56,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
               <p>For accurate review, include drawings, target dimensions, finish, order quantity, packaging needs, and destination market.</p>
             </div>
           </div>
-          <InquiryForm compact />
+          <InquiryForm compact products={products} defaultProduct={text(product.name)} />
         </div>
       </section>
     </main>

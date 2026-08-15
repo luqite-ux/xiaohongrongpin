@@ -9,21 +9,35 @@ const fields = ["name", "company", "email", "phone", "country", "product", "quan
 export async function POST(request: Request) {
   const form = await request.formData();
   const missing = required.filter((key) => !String(form.get(key) || "").trim());
+  const wantsJson = request.headers.get("accept")?.includes("application/json");
 
   if (missing.length > 0) {
+    if (wantsJson) return jsonResponse("Please complete the required fields", `Missing fields: ${missing.join(", ")}.`, 400);
     return htmlResponse("Please complete the required fields", `Missing fields: ${missing.join(", ")}.`, 400);
   }
 
   const payload = Object.fromEntries(fields.map((key) => [key, String(form.get(key) || "").trim()]));
   const saved = await saveInquiry(payload);
   if (!saved.ok) {
+    if (wantsJson) return jsonResponse("Inquiry could not be saved", saved.message, 500);
     return htmlResponse("Inquiry could not be saved", saved.message, 500);
+  }
+
+  if (wantsJson) {
+    return jsonResponse(
+      "Inquiry received",
+      "Thank you. Your project details were received. The team can now review your solar aluminum frame request."
+    );
   }
 
   return htmlResponse(
     "Inquiry received",
     "Thank you. Your project details were received by the website endpoint. The team can now review your solar aluminum frame request."
   );
+}
+
+function jsonResponse(title: string, message: string, status = 200) {
+  return NextResponse.json({ title, message }, { status });
 }
 
 async function saveInquiry(payload: Record<string, string>): Promise<{ ok: true } | { ok: false; message: string }> {

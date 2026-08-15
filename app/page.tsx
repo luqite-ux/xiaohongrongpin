@@ -2,9 +2,13 @@ import Link from "next/link";
 import { ArrowUpRight, Factory, Frame, Gauge, Settings2, ShieldCheck, SunMedium } from "lucide-react";
 import { InquiryForm } from "@/components/inquiry-form";
 import { Section } from "@/components/section";
-import { capabilityStats, products, text } from "@/lib/site-data";
+import { capabilityStats, text } from "@/lib/site-data";
+import { listPublishedArticles, formatArticleDate } from "@/lib/articles-db";
+import { listProducts } from "@/lib/products-db";
 
-export default function HomePage() {
+export default async function HomePage() {
+  const [products, articles] = await Promise.all([listProducts(), listPublishedArticles(3)]);
+
   return (
     <main>
       <section className="hero">
@@ -95,8 +99,28 @@ export default function HomePage() {
             <p>This site is designed for technical B2B inquiries. Buyers send drawings, quantities, and target schedules, then receive project-specific communication.</p>
             <Link href="/quality-control" className="link-arrow">Review quality process <ArrowUpRight size={16} /></Link>
           </div>
-          <InquiryForm compact />
+          <InquiryForm compact products={products} />
         </div>
+      </Section>
+
+      <Section eyebrow="Company updates" title="Latest news and project notes" intro="Published updates from the team will appear here automatically.">
+        {articles.length ? (
+          <div className="feature-grid">
+            {articles.map((article) => (
+              <Link className="feature-card" href={`/news/${article.slug}`} key={article.id}>
+                <p className="eyebrow">{formatArticleDate(article)}</p>
+                <h3>{article.title}</h3>
+                <p>{article.excerpt || "Read the full company update."}</p>
+                <span className="link-arrow">Read update <ArrowUpRight size={16} /></span>
+              </Link>
+            ))}
+          </div>
+        ) : (
+          <div className="page-card">
+            <h3>No published news yet</h3>
+            <p>Company updates will appear here after they are published from the admin dashboard.</p>
+          </div>
+        )}
       </Section>
     </main>
   );

@@ -1,10 +1,12 @@
 import type { MetadataRoute } from "next";
-import { products } from "@/lib/site-data";
+import { listPublishedArticles } from "@/lib/articles-db";
+import { listProducts } from "@/lib/products-db";
 
-const routes = ["", "/products", "/capabilities", "/custom-solutions", "/quality-control", "/about", "/faq", "/contact"];
+const routes = ["", "/products", "/capabilities", "/custom-solutions", "/quality-control", "/about", "/news", "/faq", "/contact"];
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://xhrpaluminum.com";
+  const [products, articles] = await Promise.all([listProducts(), listPublishedArticles(100)]);
   return [
     ...routes.map((route) => ({
       url: `${baseUrl}${route}`,
@@ -13,6 +15,10 @@ export default function sitemap(): MetadataRoute.Sitemap {
     ...products.map((product) => ({
       url: `${baseUrl}/products/${product.slug}`,
       lastModified: new Date()
+    })),
+    ...articles.map((article) => ({
+      url: `${baseUrl}/news/${article.slug}`,
+      lastModified: new Date(article.publishedAt || article.createdAt)
     }))
   ];
 }

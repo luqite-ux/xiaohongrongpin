@@ -1,14 +1,17 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowUpRight, Frame } from "lucide-react";
-import { products, text } from "@/lib/site-data";
+import { text } from "@/lib/site-data";
+import { listProducts } from "@/lib/products-db";
 
 export const metadata: Metadata = {
   title: "Products",
   description: "Solar aluminum frames, black aluminum frames, and custom aluminum profile products for photovoltaic module manufacturers."
 };
 
-export default function ProductsPage() {
+export default async function ProductsPage() {
+  const products = await listProducts();
+
   return (
     <main>
       <section className="page-hero">

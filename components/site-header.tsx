@@ -10,6 +10,7 @@ const nav = [
   ["Custom Solutions", "/custom-solutions"],
   ["Quality Control", "/quality-control"],
   ["About", "/about"],
+  ["News", "/news"],
   ["FAQ", "/faq"],
   ["Contact", "/contact"]
 ];
