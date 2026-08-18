@@ -342,6 +342,39 @@ p {
   color: rgba(255, 255, 255, 0.78);
 }
 
+.section-blue .feature-card,
+.section-blue .page-card,
+.section-blue .product-card {
+  color: var(--ink);
+  background: rgba(255, 255, 255, 0.94);
+  border-color: rgba(255, 255, 255, 0.72);
+}
+
+.section-blue .feature-card h3,
+.section-blue .page-card h3,
+.section-blue .product-card h3 {
+  color: var(--ink);
+}
+
+.section-blue .feature-card p,
+.section-blue .page-card p,
+.section-blue .product-card p {
+  color: #40566a;
+}
+
+.section-blue .feature-card .icon-badge,
+.section-blue .page-card .icon-badge,
+.section-blue .product-card .icon-badge {
+  color: #0b4e78;
+  background: #e7f5ff;
+}
+
+.section-blue .feature-card .link-arrow,
+.section-blue .page-card .link-arrow,
+.section-blue .product-card .link-arrow {
+  color: #0b4e78;
+}
+
 .section-heading {
   max-width: 780px;
   margin-bottom: 38px;
