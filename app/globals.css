@@ -266,7 +266,7 @@ p {
   position: absolute;
   left: 28px;
   right: 28px;
-  bottom: 28px;
+  top: 28px;
   padding: 22px;
   border-radius: 20px;
   background: rgba(255, 255, 255, 0.88);
