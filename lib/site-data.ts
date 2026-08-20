@@ -19,7 +19,7 @@ export const siteConfig = {
   company: "Hangzhou Xiaohongrongpin Aluminum Industry Co., Ltd.",
   chineseDisplayName: "杭州萧宏荣品铝业有限公司",
   phone: "13805786675",
-  email: "1514070298@qq.com",
+  email: "info@xhrpaluminum.com",
   address: "No. 2 Extrusion Workshop, Houshan Industrial Park, Qiantan Town, Jiande, Hangzhou, Zhejiang, China",
   tagline: "Precision solar aluminum frames for module manufacturers",
   description:

@@ -117,7 +117,7 @@ const tenantPayload = (logoUrl) => ({
   default_language: "en",
   supported_languages: ["en"],
   admin_group: 2,
-  contact_email: "1514070298@qq.com",
+  contact_email: "info@xhrpaluminum.com",
   contact_phone: "13805786675",
   contact_whatsapp: null,
   contact_address_short: "Jiande, Hangzhou, Zhejiang, China",
