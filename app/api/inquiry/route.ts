@@ -1,26 +1,40 @@
 import { NextResponse } from "next/server";
-import { mkdir, appendFile } from "node:fs/promises";
-import path from "node:path";
 import { createClient } from "@supabase/supabase-js";
+import { createSupabaseCaptchaContextFromEnv, verifyCaptchaSubmission } from "@/lib/inquiry-captcha";
 
 const required = ["name", "company", "email", "message"];
 const fields = ["name", "company", "email", "phone", "country", "product", "quantity", "message"];
 
 export async function POST(request: Request) {
   const form = await request.formData();
-  const missing = required.filter((key) => !String(form.get(key) || "").trim());
   const wantsJson = request.headers.get("accept")?.includes("application/json");
+  const secret = process.env.CAPTCHA_SECRET?.trim();
+
+  if (!secret) return responseByType(wantsJson, "Inquiry unavailable", "Inquiry service is temporarily unavailable.", 503);
+  try {
+    const { store, tenantId, siteScope } = createSupabaseCaptchaContextFromEnv();
+    const captcha = await verifyCaptchaSubmission({
+      secret, store, tenantId, siteScope,
+      scope: String(form.get("captchaScope") || ""),
+      token: String(form.get("captchaToken") || ""),
+      answer: String(form.get("captchaAnswer") || ""),
+    });
+    if (!captcha.ok) return responseByType(wantsJson, "CAPTCHA failed", "Invalid or expired CAPTCHA. Please refresh and try again.", 400);
+  } catch (error) {
+    console.error("[inquiry] CAPTCHA verification failed", error instanceof Error ? error.message : error);
+    return responseByType(wantsJson, "Inquiry unavailable", "Inquiry service is temporarily unavailable.", 503);
+  }
+
+  const missing = required.filter((key) => !String(form.get(key) || "").trim());
 
   if (missing.length > 0) {
-    if (wantsJson) return jsonResponse("Please complete the required fields", `Missing fields: ${missing.join(", ")}.`, 400);
-    return htmlResponse("Please complete the required fields", `Missing fields: ${missing.join(", ")}.`, 400);
+    return responseByType(wantsJson, "Please complete the required fields", `Missing fields: ${missing.join(", ")}.`, 400);
   }
 
   const payload = Object.fromEntries(fields.map((key) => [key, String(form.get(key) || "").trim()]));
   const saved = await saveInquiry(payload);
   if (!saved.ok) {
-    if (wantsJson) return jsonResponse("Inquiry could not be saved", saved.message, 500);
-    return htmlResponse("Inquiry could not be saved", saved.message, 500);
+    return responseByType(wantsJson, "Inquiry could not be saved", saved.message, 503);
   }
 
   if (wantsJson) {
@@ -40,13 +54,17 @@ function jsonResponse(title: string, message: string, status = 200) {
   return NextResponse.json({ title, message }, { status });
 }
 
+function responseByType(wantsJson: boolean | undefined, title: string, message: string, status = 200) {
+  return wantsJson ? jsonResponse(title, message, status) : htmlResponse(title, message, status);
+}
+
 async function saveInquiry(payload: Record<string, string>): Promise<{ ok: true } | { ok: false; message: string }> {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
   const tenantId = process.env.NEXT_PUBLIC_TENANT_ID;
 
-  if (supabaseUrl && anonKey && tenantId) {
-    const supabase = createClient(supabaseUrl, anonKey, { auth: { persistSession: false } });
+  if (supabaseUrl && serviceRoleKey && tenantId) {
+    const supabase = createClient(supabaseUrl, serviceRoleKey, { auth: { persistSession: false } });
     const details = [
       payload.message,
       payload.country ? `Country: ${payload.country}` : "",
@@ -68,10 +86,7 @@ async function saveInquiry(payload: Record<string, string>): Promise<{ ok: true 
     return { ok: true };
   }
 
-  const dir = path.join(process.cwd(), ".data");
-  await mkdir(dir, { recursive: true });
-  await appendFile(path.join(dir, "inquiries.jsonl"), `${JSON.stringify({ ...payload, createdAt: new Date().toISOString() })}\n`, "utf8");
-  return { ok: true };
+  return { ok: false, message: "Inquiry persistence is not configured." };
 }
 
 function htmlResponse(title: string, message: string, status = 200) {

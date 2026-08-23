@@ -4,11 +4,14 @@ import { Mail, MapPin, Phone } from "lucide-react";
 import { siteConfig } from "@/lib/site-data";
 
 export function SiteFooter() {
+  const legalName = "Hangzhou Xiaohongrongpin Aluminum Industry Co., Ltd.".replace(/[.\s]+$/, "");
   return (
     <footer className="site-footer">
       <div className="container footer-grid">
         <div>
-          <Image src="/logo.png" alt="XiaoHongRongPin logo" width={96} height={74} />
+          <Link href="/" aria-label="XiaoHongRongPin home">
+            <Image src="/logo.png" alt="XiaoHongRongPin logo" width={132} height={102} className="max-w-full object-contain" style={{ height: "auto" }} />
+          </Link>
           <h3>{siteConfig.company}</h3>
           <p>{siteConfig.description}</p>
         </div>
@@ -27,7 +30,7 @@ export function SiteFooter() {
           <p><MapPin size={16} /> {siteConfig.address}</p>
         </div>
       </div>
-      <div className="footer-bottom">© 2026 {siteConfig.brand}. B2B inquiry website for solar aluminum frame procurement.</div>
+      <div className="footer-bottom">© {new Date().getFullYear()} {legalName}. All rights reserved.</div>
     </footer>
   );
 }

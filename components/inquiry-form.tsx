@@ -3,30 +3,35 @@
 import { useState, type FormEvent } from "react";
 import { Send, Upload } from "lucide-react";
 import { products as fallbackProducts, text, type Product } from "@/lib/site-data";
+import { InquiryCaptchaField } from "@/components/inquiry-captcha-field";
 
 export function InquiryForm({ compact = false, products = fallbackProducts, defaultProduct }: { compact?: boolean; products?: Product[]; defaultProduct?: string }) {
   const [status, setStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
   const [message, setMessage] = useState("");
+  const [captchaRefreshKey, setCaptchaRefreshKey] = useState(0);
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const form = event.currentTarget;
     setStatus("submitting");
     setMessage("");
-    const response = await fetch("/api/inquiry", {
-      method: "POST",
-      headers: { Accept: "application/json" },
-      body: new FormData(form)
-    });
-    const result = await response.json().catch(() => ({ message: "The inquiry endpoint returned an unexpected response." }));
-    if (!response.ok) {
+    try {
+      const response = await fetch("/api/inquiry", {
+        method: "POST",
+        headers: { Accept: "application/json" },
+        body: new FormData(form)
+      });
+      const result = await response.json().catch(() => ({ message: "The inquiry endpoint returned an unexpected response." }));
+      if (!response.ok) throw new Error(result.message || "Please check the required fields and try again.");
+      form.reset();
+      setStatus("success");
+      setMessage(result.message || "Inquiry received. The team will review your project details.");
+    } catch (error) {
       setStatus("error");
-      setMessage(result.message || "Please check the required fields and try again.");
-      return;
+      setMessage(error instanceof Error ? error.message : "Please check the required fields and try again.");
+    } finally {
+      setCaptchaRefreshKey((key) => key + 1);
     }
-    form.reset();
-    setStatus("success");
-    setMessage(result.message || "Inquiry received. The team will review your project details.");
   }
 
   return (
@@ -74,6 +79,7 @@ export function InquiryForm({ compact = false, products = fallbackProducts, defa
         <Upload size={18} />
         If drawings are required, mention dimensions and file details in the message so the team can follow up.
       </div>
+      <InquiryCaptchaField refreshKey={captchaRefreshKey} />
       {message ? <p className={status === "error" ? "form-message error" : "form-message"}>{message}</p> : null}
       <button type="submit" className="primary-button" disabled={status === "submitting"}>
         {status === "submitting" ? "Sending..." : "Send Inquiry"} <Send size={18} />
