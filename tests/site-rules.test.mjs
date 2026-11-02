@@ -33,6 +33,18 @@ if (missing.length) {
   throw new Error(`Missing required delivery files: ${missing.join(", ")}`);
 }
 
+const globalStyles = fs.readFileSync(path.join(root, "app", "globals.css"), "utf8");
+const requiredArticleTableStyles = [
+  /\.article-body\s+table\s*\{/,
+  /\.article-body\s+th\s*,\s*\n?\s*\.article-body\s+td\s*\{/,
+  /border:\s*1px\s+solid\s+[^;]+;/,
+  /border-collapse:\s*collapse;/
+];
+
+if (requiredArticleTableStyles.some((pattern) => !pattern.test(globalStyles))) {
+  throw new Error("Article tables must render collapsed cell borders in the public news detail page.");
+}
+
 const hits = [];
 for (const file of walk(root)) {
   if (path.relative(root, file) === path.join("tests", "site-rules.test.mjs")) continue;
